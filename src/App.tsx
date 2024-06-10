@@ -8,6 +8,7 @@ import {
   IonTabButton,
   IonTabs,
   setupIonicReact,
+  useIonRouter,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { ellipse, square, triangle } from "ionicons/icons";
@@ -48,52 +49,76 @@ import DishMng from "./pages/dishMng/DishMng";
 import UpdateDish from "./pages/dishMng/UpdateDish";
 import CreateDish from "./pages/dishMng/CreateDish";
 import CreateOrder from "./pages/orderList/CreateOrder";
+import OrderDetail from "./pages/orderList/OrderDetail";
+import OrderMng from "./pages/orderList/OrderMng";
+import OrderDishPage from "./pages/orderDishes/OrderDishes";
 
 setupIonicReact();
 
-const App = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonTabs>
-        <IonRouterOutlet>
-          <Route exact path="/orderList">
-            <OrderList />
-          </Route>
-          <Route exact path="/orderDishes">
-            <CreateOrder />
-          </Route>
-          <Route exact path="/settings">
-            <Settings />
-          </Route>
-          <Route exact path="/appInfo">
-            <AppInfo />
-          </Route>
-          <Route exact path="/dishMng">
-            <DishMng />
-          </Route>
-          <Route exact path="/addDish">
-            <CreateDish />
-          </Route>
-          <Route exact path="/updateDish/:id">
-            <UpdateDish />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/orderList" />
-          </Route>
-        </IonRouterOutlet>
-        <IonTabBar slot="bottom">
-          <IonTabButton tab="tab1" href="/orderList">
-            <IonIcon aria-hidden="true" icon={triangle} />
-            <IonLabel>历史订单</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab2" href="/settings">
-            <IonIcon aria-hidden="true" icon={ellipse} />
-            <IonLabel>设置</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
-      </IonTabs>
-    </IonReactRouter>
-  </IonApp>
-);
+const Routes = () => {
+  const router = useIonRouter();
+
+  console.log(router.routeInfo);
+
+  return (
+    <IonTabs>
+      <IonRouterOutlet>
+        <Route exact path="/orderList">
+          <OrderMng />
+        </Route>
+        <Route exact path="/addOrder">
+          <CreateOrder />
+        </Route>
+        <Route exact path="/orderDetail/:id">
+          <OrderDetail />
+        </Route>
+        <Route exact path="/orderDishes/:id">
+          <OrderDishPage />
+        </Route>
+        <Route exact path="/settings">
+          <Settings />
+        </Route>
+        <Route exact path="/appInfo">
+          <AppInfo />
+        </Route>
+        <Route exact path="/dishMng">
+          <DishMng />
+        </Route>
+        <Route exact path="/addDish">
+          <CreateDish />
+        </Route>
+        <Route exact path="/updateDish/:id">
+          <UpdateDish />
+        </Route>
+        <Route exact path="/">
+          <Redirect to="/orderList" />
+        </Route>
+      </IonRouterOutlet>
+      <IonTabBar
+        slot="bottom"
+        hidden={router.routeInfo.pathname.startsWith(`/orderDishes`)}
+      >
+        <IonTabButton tab="tab1" href="/orderList">
+          <IonIcon aria-hidden="true" icon={triangle} />
+          <IonLabel>订单</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="tab2" href="/settings">
+          <IonIcon aria-hidden="true" icon={ellipse} />
+          <IonLabel>设置</IonLabel>
+        </IonTabButton>
+      </IonTabBar>
+    </IonTabs>
+  );
+};
+
+const App = () => {
+  return (
+    <IonApp>
+      <IonReactRouter>
+        <Routes />
+      </IonReactRouter>
+    </IonApp>
+  );
+};
 
 export default App;

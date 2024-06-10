@@ -19,7 +19,7 @@ import { useParams } from "react-router";
 import { API_DISH } from "../../apis/dish";
 import LoadingSkeleton from "../../components/LoadingSkeleton";
 
-const UpdateDish = () => {
+const UpdateDishForm = () => {
   const { id } = useParams<{ id: string }>();
 
   const { isPending, data, isError, error } = useQuery({
@@ -36,6 +36,36 @@ const UpdateDish = () => {
   }
 
   return (
+    <>
+      <IonImg src={data?.cover} className="h-64 object-cover" />
+
+      <IonList>
+        <IonItem>
+          <IonInput label="菜品名称" value={data?.name} />
+        </IonItem>
+
+        <IonItem>
+          <IonTextarea label="菜品描述" value={data?.description} rows={6} />
+        </IonItem>
+
+        <IonItem>
+          <IonInput label="菜品价格" value={data?.price} />
+        </IonItem>
+
+        <IonItem>
+          <IonInput label="菜品种类" value={data?.type} />
+        </IonItem>
+      </IonList>
+
+      <IonItem>
+        <IonLabel>菜品图片:</IonLabel>
+      </IonItem>
+    </>
+  );
+};
+
+const UpdateDish = () => {
+  return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
@@ -46,29 +76,7 @@ const UpdateDish = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen color="light">
-        <IonImg src={data?.cover} className="h-64 object-cover" />
-
-        <IonList>
-          <IonItem>
-            <IonInput label="菜品名称" value={data?.name} />
-          </IonItem>
-
-          <IonItem>
-            <IonTextarea label="菜品描述" value={data?.description} rows={6} />
-          </IonItem>
-
-          <IonItem>
-            <IonInput label="菜品价格" value={data?.price} />
-          </IonItem>
-
-          <IonItem>
-            <IonInput label="菜品种类" value={data?.type} />
-          </IonItem>
-        </IonList>
-
-        <IonItem>
-          <IonLabel>菜品图片:</IonLabel>
-        </IonItem>
+        <UpdateDishForm />
       </IonContent>
     </IonPage>
   );

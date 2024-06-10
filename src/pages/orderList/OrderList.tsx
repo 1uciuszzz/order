@@ -1,29 +1,92 @@
 import {
   IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
   IonIcon,
+  IonItem,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
+  IonLabel,
   IonPage,
+  IonSpinner,
+  IonText,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import { beerOutline } from "ionicons/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { trashOutline } from "ionicons/icons";
+import { API_ORDER, Order } from "../../apis/order";
+import LoadingSkeleton from "../../components/LoadingSkeleton";
+
+type OrderItemProps = {
+  order: Order;
+};
+
+const OrderItem = ({ order }: OrderItemProps) => {
+  const queryClient = useQueryClient();
+
+  const {
+    isPending: delIsPending,
+    mutate: del,
+    isError: delIsError,
+    error: delError,
+  } = useMutation({
+    mutationFn: (id: string) => API_ORDER.DELETE(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["orderList"],
+      });
+    },
+  });
+
+  return (
+    <>
+      {delIsError && <IonText color="danger">{delError.message}</IonText>}
+
+      <IonItemSliding>
+        <IonItem button routerLink={`/orderDetail/${order.id}`}>
+          <IonLabel>{order.name}</IonLabel>
+        </IonItem>
+        <IonItemOptions side="end">
+          <IonItemOption color="danger">
+            {delIsPending ? (
+              <IonSpinner />
+            ) : (
+              <IonIcon
+                slot="icon-only"
+                icon={trashOutline}
+                onClick={() => del(order.id)}
+              />
+            )}
+          </IonItemOption>
+        </IonItemOptions>
+      </IonItemSliding>
+    </>
+  );
+};
 
 const OrderList = () => {
+  const { isPending, data, isError, error } = useQuery({
+    queryKey: ["orderList"],
+    queryFn: () => API_ORDER.LIST(),
+  });
+
+  if (isPending) {
+    return <LoadingSkeleton />;
+  }
+
+  if (isError) {
+    return <IonText color="danger">{error.message}</IonText>;
+  }
+
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>历史订单</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen color="light">
-        <IonButton size="large" routerLink="/orderDishes">
-          <IonIcon slot="start" icon={beerOutline} />
-          创建订单
-        </IonButton>
-      </IonContent>
-    </IonPage>
+    <>
+      {data.map((order) => (
+        <OrderItem key={order.id} order={order} />
+      ))}
+    </>
   );
 };
 

@@ -1,21 +1,45 @@
 import { v4 as uuid } from "uuid";
 
+export type OrderStatus = "pending" | "completed" | "cancelled";
+
 export type Order = {
   id: string;
   name: string;
-  status: string;
+  status: OrderStatus;
   createdAt: string;
   updatedAt: string;
 };
 
 export type OrderList = Order[];
 
-const ORDER_LIST: OrderList = [];
-
 export type AddOrder = {
   name: string;
-  status: string;
+  status: OrderStatus;
 };
+
+const ORDER_LIST: OrderList = [
+  {
+    id: "1",
+    name: "订单1",
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    name: "订单2",
+    status: "completed",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    name: "订单3",
+    status: "cancelled",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
 export const API_ORDER = {
   LIST: () => {
@@ -30,7 +54,8 @@ export const API_ORDER = {
       setTimeout(() => {
         const newOrder: Order = {
           id: uuid(),
-          ...payload,
+          name: payload.name,
+          status: payload.status,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
