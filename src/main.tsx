@@ -20,10 +20,6 @@ const initFolders = async () => {
     directory: Directory.Data,
   });
   await Filesystem.mkdir({
-    path: "orderDishes",
-    directory: Directory.Data,
-  });
-  await Filesystem.mkdir({
     path: "covers",
     directory: Directory.Data,
   });

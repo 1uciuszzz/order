@@ -1,74 +1,100 @@
+import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { v4 as uuid } from "uuid";
 
-export type OrderStatus = "pending" | "completed" | "cancelled";
+export type OrderDish = {
+  dishId: string;
+  dishName: string;
+  dishPrice: number;
+  quantity: number;
+};
 
 export type Order = {
   id: string;
-  name: string;
-  status: OrderStatus;
+  dishes: OrderDish[];
+  price: number;
   createdAt: string;
 };
 
 export type OrderList = Order[];
 
 export type AddOrder = {
-  name: string;
-  status: OrderStatus;
+  dishes: OrderDish[];
 };
 
-const ORDER_LIST: OrderList = [
-  {
-    id: "1",
-    name: "订单1",
-    status: "pending",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "订单2",
-    status: "completed",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    name: "订单3",
-    status: "cancelled",
-    createdAt: new Date().toISOString(),
-  },
-];
-
 export const API_ORDER = {
-  LIST: () => {
-    return new Promise<OrderList>((resolve) => {
-      setTimeout(() => {
-        resolve(ORDER_LIST);
-      }, 1000);
-    });
+  LIST: async (): Promise<OrderList> => {
+    try {
+      const dir = await Filesystem.readdir({
+        path: `orders`,
+        directory: Directory.Data,
+      });
+      const files = await Promise.all(
+        dir.files.map((file) => {
+          return Filesystem.readFile({
+            path: `orders/${file.name}`,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8,
+          });
+        })
+      );
+      const list = files.map(
+        (file) => JSON.parse(file.data as string) as Order
+      );
+      list.sort((a, b) => {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+      return list;
+    } catch {
+      throw new Error("获取订单列表失败");
+    }
   },
-  ADD: (payload: AddOrder) => {
-    return new Promise<Order>((resolve) => {
-      setTimeout(() => {
-        const newOrder: Order = {
-          id: uuid(),
-          name: payload.name,
-          status: payload.status,
-          createdAt: new Date().toISOString(),
-        };
-        ORDER_LIST.push(newOrder);
-        resolve(newOrder);
-      }, 1000);
-    });
+  ADD: async (payload: AddOrder) => {
+    try {
+      const id = uuid();
+      const price = payload.dishes.reduce(
+        (acc, dish) => acc + dish.dishPrice * dish.quantity,
+        0
+      );
+      const newOrder: Order = {
+        id,
+        dishes: payload.dishes,
+        price,
+        createdAt: new Date().toISOString(),
+      };
+      await Filesystem.writeFile({
+        path: `orders/${id}`,
+        data: JSON.stringify(newOrder),
+        directory: Directory.Data,
+        encoding: Encoding.UTF8,
+      });
+      return newOrder;
+    } catch {
+      throw new Error("新增订单失败");
+    }
   },
-  UPDATE: () => {},
-  DELETE: (id: string) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const index = ORDER_LIST.findIndex((order) => order.id === id);
-        if (index > -1) {
-          ORDER_LIST.splice(index, 1);
-          resolve();
-        }
-      }, 1000);
-    });
+  DELETE: async (id: string) => {
+    try {
+      await Filesystem.deleteFile({
+        path: `orders/${id}`,
+        directory: Directory.Data,
+      });
+      return true;
+    } catch {
+      throw new Error("删除订单失败");
+    }
+  },
+  GET: async (id: string) => {
+    try {
+      const file = await Filesystem.readFile({
+        path: `orders/${id}`,
+        directory: Directory.Data,
+        encoding: Encoding.UTF8,
+      });
+      return JSON.parse(file.data as string) as Order;
+    } catch {
+      throw new Error("获取订单失败");
+    }
   },
 };

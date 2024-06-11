@@ -71,7 +71,7 @@ export const API_DISH = {
         type: payload.type,
         createdAt: new Date().toISOString(),
       };
-      const path = `dishes/${id}.json`;
+      const path = `dishes/${id}`;
       await Filesystem.writeFile({
         path,
         data: JSON.stringify(newDish),
@@ -101,7 +101,7 @@ export const API_DISH = {
         type: payload.type,
         createdAt: new Date().toISOString(),
       };
-      const path = `dishes/${payload.id}.json`;
+      const path = `dishes/${payload.id}`;
       await Filesystem.writeFile({
         path,
         data: JSON.stringify(updatedDish),
@@ -115,7 +115,7 @@ export const API_DISH = {
   },
   DELETE: async (id: string): Promise<boolean> => {
     try {
-      const path = `dishes/${id}.json`;
+      const path = `dishes/${id}`;
       await Filesystem.deleteFile({
         path,
         directory: Directory.Data,
@@ -127,7 +127,7 @@ export const API_DISH = {
   },
   GET: async (id: string): Promise<Dish> => {
     try {
-      const path = `dishes/${id}.json`;
+      const path = `dishes/${id}`;
       const file = await Filesystem.readFile({
         path,
         directory: Directory.Data,

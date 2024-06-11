@@ -1,19 +1,12 @@
 import {
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
   IonIcon,
   IonItem,
   IonItemOption,
   IonItemOptions,
   IonItemSliding,
   IonLabel,
-  IonPage,
   IonSpinner,
   IonText,
-  IonTitle,
-  IonToolbar,
 } from "@ionic/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { trashOutline } from "ionicons/icons";
@@ -47,7 +40,7 @@ const OrderItem = ({ order }: OrderItemProps) => {
 
       <IonItemSliding>
         <IonItem button routerLink={`/orderDetail/${order.id}`}>
-          <IonLabel>{order.name}</IonLabel>
+          <IonLabel>{new Date(order.createdAt).toLocaleString()}</IonLabel>
         </IonItem>
         <IonItemOptions side="end">
           <IonItemOption color="danger">

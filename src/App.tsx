@@ -46,7 +46,6 @@ import "./theme/variables.css";
 import AppInfo from "./pages/appInfo/AppInfo";
 import DishMng from "./pages/dishMng/DishMng";
 import CreateDish from "./pages/dishMng/CreateDish";
-import CreateOrder from "./pages/orderList/CreateOrder";
 import OrderDetail from "./pages/orderList/OrderDetail";
 import OrderMng from "./pages/orderList/OrderMng";
 import OrderDishPage from "./pages/orderDishes/OrderDishes";
@@ -55,21 +54,16 @@ import UpdateDishPage from "./pages/dishMng/UpdateDish";
 setupIonicReact();
 
 const Routes = () => {
-  const router = useIonRouter();
-
   return (
     <IonTabs>
       <IonRouterOutlet>
         <Route exact path="/orderList">
           <OrderMng />
         </Route>
-        <Route exact path="/addOrder">
-          <CreateOrder />
-        </Route>
         <Route exact path="/orderDetail/:id">
           <OrderDetail />
         </Route>
-        <Route exact path="/orderDishes/:id">
+        <Route exact path="/orderDish">
           <OrderDishPage />
         </Route>
         <Route exact path="/settings">
@@ -88,18 +82,19 @@ const Routes = () => {
           <UpdateDishPage />
         </Route>
         <Route exact path="/">
-          <Redirect to="/orderList" />
+          <Redirect to="/orderDish" />
         </Route>
       </IonRouterOutlet>
-      <IonTabBar
-        slot="bottom"
-        hidden={router.routeInfo.pathname.startsWith(`/orderDishes`)}
-      >
-        <IonTabButton tab="tab1" href="/orderList">
+      <IonTabBar slot="bottom">
+        <IonTabButton tab="tab1" href="/orderDish">
+          <IonIcon aria-hidden="true" icon={square} />
+          <IonLabel>点餐</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="tab2" href="/orderList">
           <IonIcon aria-hidden="true" icon={triangle} />
           <IonLabel>订单</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="tab2" href="/settings">
+        <IonTabButton tab="tab3" href="/settings">
           <IonIcon aria-hidden="true" icon={ellipse} />
           <IonLabel>设置</IonLabel>
         </IonTabButton>

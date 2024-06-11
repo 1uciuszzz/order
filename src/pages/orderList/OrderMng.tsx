@@ -17,11 +17,6 @@ const OrderMng = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>订单管理</IonTitle>
-          <IonButtons slot="end">
-            <IonButton routerLink="/addOrder">
-              <IonIcon slot="icon-only" icon={addOutline} />
-            </IonButton>
-          </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen color="light">
