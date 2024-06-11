@@ -1,5 +1,6 @@
 import {
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
@@ -9,15 +10,19 @@ import {
   IonLabel,
   IonList,
   IonPage,
+  IonText,
   IonTextarea,
   IonTitle,
   IonToolbar,
+  useIonRouter,
 } from "@ionic/react";
 import { useImmer } from "use-immer";
-import { AddDish } from "../../apis/dish";
+import { API_DISH, AddDish } from "../../apis/dish";
+import { Camera, CameraResultType } from "@capacitor/camera";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const initialData: AddDish = {
-  cover: "/temp/covers/defaultCover.png",
+  cover: "",
   name: "",
   description: "",
   price: "",
@@ -26,6 +31,48 @@ const initialData: AddDish = {
 
 const CreateDish = () => {
   const [dish, setDish] = useImmer<AddDish>(initialData);
+
+  const router = useIonRouter();
+
+  const handleGetDishCover = async () => {
+    try {
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.Base64,
+      });
+      setDish((d) => {
+        d.cover = photo.base64String!;
+      });
+    } catch {
+      throw new Error("获取图片失败");
+    }
+  };
+
+  const {
+    isPending: getCoverIsPending,
+    mutate: getCover,
+    isError: getCoverIsError,
+    error: getCoverError,
+  } = useMutation({
+    mutationFn: () => handleGetDishCover(),
+  });
+
+  const queryClient = useQueryClient();
+
+  const {
+    isPending: saveIsPending,
+    mutate: saveDish,
+    isError: saveIsError,
+    error: saveError,
+  } = useMutation({
+    mutationFn: () => API_DISH.ADD(dish),
+    onSuccess: () => {
+      router.push(`/dishMng`, "back");
+      queryClient.invalidateQueries({
+        queryKey: ["dishList"],
+      });
+      setDish(() => initialData);
+    },
+  });
 
   return (
     <IonPage>
@@ -38,7 +85,27 @@ const CreateDish = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen color="light">
-        <IonImg src={dish.cover} className="h-64 object-cover" />
+        {getCoverIsError && (
+          <IonText color="danger">{getCoverError.message}</IonText>
+        )}
+
+        <IonImg
+          src={
+            dish.cover
+              ? `data:image/jpeg;base64,${dish.cover}`
+              : `/temp/covers/defaultCover.png`
+          }
+          className="h-64 object-cover"
+        />
+
+        <IonButton
+          fill="clear"
+          expand="full"
+          onClick={() => getCover()}
+          disabled={getCoverIsPending}
+        >
+          上传菜品封面
+        </IonButton>
 
         <IonList>
           <IonItem>
@@ -69,6 +136,7 @@ const CreateDish = () => {
 
           <IonItem>
             <IonInput
+              type="number"
               label="菜品价格"
               value={dish.price}
               onIonInput={(e) => {
@@ -85,14 +153,25 @@ const CreateDish = () => {
             <IonInput
               label="菜品种类"
               value={dish.type}
-              onIonInput={(e) => {}}
+              onIonInput={(e) => {
+                setDish((d) => {
+                  d.type = e.target.value as string;
+                });
+              }}
             />
           </IonItem>
         </IonList>
 
-        <IonItem>
-          <IonLabel>菜品图片:</IonLabel>
-        </IonItem>
+        {saveIsError && <IonText color="danger">{saveError.message}</IonText>}
+
+        <IonButton
+          fill="clear"
+          expand="full"
+          onClick={() => saveDish()}
+          disabled={saveIsPending}
+        >
+          保存
+        </IonButton>
       </IonContent>
     </IonPage>
   );

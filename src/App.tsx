@@ -12,7 +12,6 @@ import {
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { ellipse, square, triangle } from "ionicons/icons";
-import OrderList from "./pages/orderList/OrderList";
 import Settings from "./pages/settings/Settings";
 
 /* Core CSS required for Ionic components to work properly */
@@ -57,8 +56,6 @@ setupIonicReact();
 
 const Routes = () => {
   const router = useIonRouter();
-
-  console.log(router.routeInfo);
 
   return (
     <IonTabs>

@@ -7,7 +7,6 @@ export type Order = {
   name: string;
   status: OrderStatus;
   createdAt: string;
-  updatedAt: string;
 };
 
 export type OrderList = Order[];
@@ -23,21 +22,18 @@ const ORDER_LIST: OrderList = [
     name: "订单1",
     status: "pending",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
   {
     id: "2",
     name: "订单2",
     status: "completed",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
   {
     id: "3",
     name: "订单3",
     status: "cancelled",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
 ];
 
@@ -57,7 +53,6 @@ export const API_ORDER = {
           name: payload.name,
           status: payload.status,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
         };
         ORDER_LIST.push(newOrder);
         resolve(newOrder);

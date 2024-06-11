@@ -6,56 +6,12 @@ export type Dish = {
   price: string;
   type: string;
   createdAt: string;
-  updatedAt: string;
 };
 
 export type DishList = Dish[];
 
+import { Directory, Filesystem } from "@capacitor/filesystem";
 import { v4 as uuid } from "uuid";
-
-const DISH_LIST: DishList = [
-  {
-    id: uuid(),
-    name: "拔丝土豆",
-    description: "拔丝土豆是一道色香味俱全的特色名菜，属于鲁菜系",
-    cover: "/temp/covers/1.jpeg",
-    price: "38",
-    type: "鲁菜",
-    createdAt: "2021-09-01T00:00:00Z",
-    updatedAt: "2021-09-01T00:00:00Z",
-  },
-  {
-    id: uuid(),
-    name: "白灼菜心",
-    description:
-      "白灼菜心是经典粤菜，白灼是粤菜的一种烹饪技法，用煮沸的水或汤将生的食物烫熟，称为白灼。这种烹饪手法能保持原有的鲜味，粤菜常用此法烹制虾和蔬菜。",
-    cover: "/temp/covers/2.jpg",
-    price: "28",
-    type: "粤菜",
-    createdAt: "2021-09-01T00:00:00Z",
-    updatedAt: "2021-09-01T00:00:00Z",
-  },
-  {
-    id: uuid(),
-    name: "包菜炒鸡蛋粉丝",
-    description: "包菜炒鸡蛋粉丝，是中国的一道日常生活中所熟知的菜品",
-    cover: "/temp/covers/3.jpg",
-    price: "18",
-    type: "川菜",
-    createdAt: "2021-09-01T00:00:00Z",
-    updatedAt: "2021-09-01T00:00:00Z",
-  },
-  {
-    id: uuid(),
-    name: "菠菜炒鸡蛋",
-    description: "这道菜难度系数简单，营养丰富。",
-    cover: "/temp/covers/4.jpg",
-    price: "15",
-    type: "川菜",
-    createdAt: "2021-09-01T00:00:00Z",
-    updatedAt: "2021-09-01T00:00:00Z",
-  },
-];
 
 export type AddDish = {
   name: string;
@@ -73,62 +29,97 @@ type ListDishResponse = {
 };
 
 export const API_DISH = {
-  LIST: async () => {
-    return new Promise<ListDishResponse>((resolve) => {
-      const types = new Set(DISH_LIST.map((dish) => dish.type));
-      setTimeout(() => {
-        resolve({
-          list: DISH_LIST,
-          type: Array.from(types),
-        });
-      }, 1000);
-    });
+  LIST: async (): Promise<ListDishResponse> => {
+    try {
+      const dir = await Filesystem.readdir({
+        path: `dishes`,
+        directory: Directory.Data,
+      });
+      const files = await Promise.all(
+        dir.files.map((file) => {
+          console.log(file);
+          return Filesystem.readFile({
+            path: `dishes/${file.name}`,
+            directory: Directory.Data,
+          });
+        })
+      );
+      const list = files.map((file) => JSON.parse(file.data as string) as Dish);
+      const type = Array.from(new Set(list.map((dish) => dish.type)));
+      return { list, type };
+    } catch {
+      throw new Error("获取菜品列表失败");
+    }
   },
-  ADD: (payload: AddDish) => {
-    return new Promise<Dish>((resolve) => {
-      setTimeout(() => {
-        const newDish: Dish = {
-          id: uuid(),
-          ...payload,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        DISH_LIST.push(newDish);
-        resolve(newDish);
-      }, 1000);
-    });
+  ADD: async (payload: AddDish): Promise<Dish> => {
+    console.log(payload);
+
+    try {
+      const id = uuid();
+      const newDish: Dish = {
+        id: id,
+        name: payload.name,
+        description: payload.description,
+        price: payload.price,
+        cover: payload.cover,
+        type: payload.type,
+        createdAt: new Date().toISOString(),
+      };
+      const path = `dishes/${id}.json`;
+      await Filesystem.writeFile({
+        path,
+        data: JSON.stringify(newDish),
+        directory: Directory.Data,
+      });
+      return newDish;
+    } catch {
+      throw new Error("添加菜品失败");
+    }
   },
-  UPDATE: (payload: UpdateDish) => {
-    return new Promise<Dish>((resolve) => {
-      setTimeout(() => {
-        const index = DISH_LIST.findIndex((dish) => dish.id === payload.id);
-        if (index > -1) {
-          DISH_LIST[index] = {
-            ...DISH_LIST[index],
-            ...payload,
-            updatedAt: new Date().toISOString(),
-          };
-          resolve(DISH_LIST[index]);
-        }
-      }, 1000);
-    });
+  UPDATE: async (payload: UpdateDish) => {
+    try {
+      const updatedDish: Dish = {
+        id: payload.id,
+        name: payload.name,
+        description: payload.description,
+        price: payload.price,
+        cover: payload.cover,
+        type: payload.type,
+        createdAt: new Date().toISOString(),
+      };
+      const path = `dishes/${payload.id}.json`;
+      await Filesystem.writeFile({
+        path,
+        data: JSON.stringify(updatedDish),
+        directory: Directory.Data,
+      });
+      return updatedDish;
+    } catch {
+      throw new Error("更新菜品失败");
+    }
   },
-  DELETE: (id: string) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const index = DISH_LIST.findIndex((dish) => dish.id === id);
-        if (index > -1) {
-          DISH_LIST.splice(index, 1);
-        }
-        resolve();
-      }, 1000);
-    });
+  DELETE: async (id: string): Promise<boolean> => {
+    try {
+      const path = `dishes/${id}.json`;
+      await Filesystem.deleteFile({
+        path,
+        directory: Directory.Data,
+      });
+      return true;
+    } catch {
+      throw new Error("删除菜品失败");
+    }
   },
-  GET: (id: string) => {
-    return new Promise<Dish | undefined>((resolve) => {
-      setTimeout(() => {
-        resolve(DISH_LIST.find((dish) => dish.id === id));
-      }, 1000);
-    });
+  GET: async (id: string): Promise<Dish> => {
+    try {
+      const path = `dishes/${id}.json`;
+      const file = await Filesystem.readFile({
+        path,
+        directory: Directory.Data,
+      });
+      return JSON.parse(file.data as string) as Dish;
+    } catch {
+      throw new Error("获取菜品失败");
+    }
   },
 };
