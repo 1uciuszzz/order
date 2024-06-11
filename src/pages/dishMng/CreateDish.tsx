@@ -20,6 +20,7 @@ import { useImmer } from "use-immer";
 import { API_DISH, AddDish } from "../../apis/dish";
 import { Camera, CameraResultType } from "@capacitor/camera";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import getCover from "../../utils/getCover";
 
 const initialData: AddDish = {
   cover: "",
@@ -34,26 +35,18 @@ const CreateDish = () => {
 
   const router = useIonRouter();
 
-  const handleGetDishCover = async () => {
-    try {
-      const photo = await Camera.getPhoto({
-        resultType: CameraResultType.Base64,
-      });
-      setDish((d) => {
-        d.cover = photo.base64String!;
-      });
-    } catch {
-      throw new Error("获取图片失败");
-    }
-  };
-
   const {
-    isPending: getCoverIsPending,
-    mutate: getCover,
-    isError: getCoverIsError,
-    error: getCoverError,
+    isPending: uploadCoverIsPending,
+    mutate: uploadCover,
+    isError: uploadCoverIsError,
+    error: uploadCoverError,
   } = useMutation({
-    mutationFn: () => handleGetDishCover(),
+    mutationFn: () => getCover(),
+    onSuccess: (dataUrl) => {
+      setDish((d) => {
+        d.cover = dataUrl;
+      });
+    },
   });
 
   const queryClient = useQueryClient();
@@ -85,24 +78,20 @@ const CreateDish = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen color="light">
-        {getCoverIsError && (
-          <IonText color="danger">{getCoverError.message}</IonText>
+        {uploadCoverIsError && (
+          <IonText color="danger">{uploadCoverError.message}</IonText>
         )}
 
-        <IonImg
-          src={
-            dish.cover
-              ? `data:image/jpeg;base64,${dish.cover}`
-              : `/temp/covers/defaultCover.png`
-          }
-          className="h-64 object-cover"
+        <img
+          src={dish.cover ? `${dish.cover}` : `/temp/covers/defaultCover.png`}
+          className="h-64 w-full object-cover"
         />
 
         <IonButton
           fill="clear"
           expand="full"
-          onClick={() => getCover()}
-          disabled={getCoverIsPending}
+          onClick={() => uploadCover()}
+          disabled={uploadCoverIsPending}
         >
           上传菜品封面
         </IonButton>

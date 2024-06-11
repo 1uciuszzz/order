@@ -45,12 +45,12 @@ import "@ionic/react/css/palettes/dark.system.css";
 import "./theme/variables.css";
 import AppInfo from "./pages/appInfo/AppInfo";
 import DishMng from "./pages/dishMng/DishMng";
-import UpdateDish from "./pages/dishMng/UpdateDish";
 import CreateDish from "./pages/dishMng/CreateDish";
 import CreateOrder from "./pages/orderList/CreateOrder";
 import OrderDetail from "./pages/orderList/OrderDetail";
 import OrderMng from "./pages/orderList/OrderMng";
 import OrderDishPage from "./pages/orderDishes/OrderDishes";
+import UpdateDishPage from "./pages/dishMng/UpdateDish";
 
 setupIonicReact();
 
@@ -85,7 +85,7 @@ const Routes = () => {
           <CreateDish />
         </Route>
         <Route exact path="/updateDish/:id">
-          <UpdateDish />
+          <UpdateDishPage />
         </Route>
         <Route exact path="/">
           <Redirect to="/orderList" />

@@ -27,6 +27,16 @@ const DishItem = ({ dish }: DishItemProps) => {
   const queryClient = useQueryClient();
 
   const {
+    isPending: coverIsPending,
+    data: cover,
+    isError: coverIsError,
+    error: coverError,
+  } = useQuery({
+    queryKey: ["cover", dish.cover],
+    queryFn: () => API_DISH.GET_COVER(dish.cover),
+  });
+
+  const {
     isPending: delIsPending,
     mutate: del,
     isError: delIsError,
@@ -47,13 +57,22 @@ const DishItem = ({ dish }: DishItemProps) => {
       <IonItemSliding>
         <IonItem button routerLink={`/updateDish/${dish.id}`}>
           <IonThumbnail slot="start">
+            {coverIsPending && <IonSpinner />}
+            {coverIsError && (
+              <IonText color="danger">{coverError.message}</IonText>
+            )}
             <img
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
               alt={dish.name}
-              src={dish.cover}
+              src={
+                dish.cover
+                  ? `data:image/png;base64,${cover}`
+                  : `/temp/covers/defaultCover.png`
+              }
             />
           </IonThumbnail>
           <IonLabel>{dish.name}</IonLabel>
+          <IonLabel slot="end">￥{dish.price}</IonLabel>
         </IonItem>
         <IonItemOptions side="end">
           <IonItemOption color="danger">

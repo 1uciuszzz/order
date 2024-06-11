@@ -10,8 +10,9 @@ export type Dish = {
 
 export type DishList = Dish[];
 
-import { Directory, Filesystem } from "@capacitor/filesystem";
+import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { v4 as uuid } from "uuid";
+import getSha256 from "../utils/getSha256";
 
 export type AddDish = {
   name: string;
@@ -37,10 +38,10 @@ export const API_DISH = {
       });
       const files = await Promise.all(
         dir.files.map((file) => {
-          console.log(file);
           return Filesystem.readFile({
             path: `dishes/${file.name}`,
             directory: Directory.Data,
+            encoding: Encoding.UTF8,
           });
         })
       );
@@ -52,16 +53,21 @@ export const API_DISH = {
     }
   },
   ADD: async (payload: AddDish): Promise<Dish> => {
-    console.log(payload);
-
     try {
       const id = uuid();
+      const sha256 = await getSha256(payload.cover);
+      const coverContent = payload.cover.split(",")[1];
+      await Filesystem.writeFile({
+        path: `covers/${sha256}`,
+        data: coverContent,
+        directory: Directory.Data,
+      });
       const newDish: Dish = {
         id: id,
         name: payload.name,
         description: payload.description,
         price: payload.price,
-        cover: payload.cover,
+        cover: sha256,
         type: payload.type,
         createdAt: new Date().toISOString(),
       };
@@ -70,20 +76,28 @@ export const API_DISH = {
         path,
         data: JSON.stringify(newDish),
         directory: Directory.Data,
+        encoding: Encoding.UTF8,
       });
       return newDish;
     } catch {
-      throw new Error("添加菜品失败");
+      throw new Error("新增菜品失败");
     }
   },
   UPDATE: async (payload: UpdateDish) => {
     try {
+      const sha256 = await getSha256(payload.cover);
+      const coverContent = payload.cover.split(",")[1];
+      await Filesystem.writeFile({
+        path: `covers/${sha256}`,
+        data: coverContent,
+        directory: Directory.Data,
+      });
       const updatedDish: Dish = {
         id: payload.id,
         name: payload.name,
         description: payload.description,
         price: payload.price,
-        cover: payload.cover,
+        cover: sha256,
         type: payload.type,
         createdAt: new Date().toISOString(),
       };
@@ -92,6 +106,7 @@ export const API_DISH = {
         path,
         data: JSON.stringify(updatedDish),
         directory: Directory.Data,
+        encoding: Encoding.UTF8,
       });
       return updatedDish;
     } catch {
@@ -116,10 +131,22 @@ export const API_DISH = {
       const file = await Filesystem.readFile({
         path,
         directory: Directory.Data,
+        encoding: Encoding.UTF8,
       });
       return JSON.parse(file.data as string) as Dish;
     } catch {
       throw new Error("获取菜品失败");
+    }
+  },
+  GET_COVER: async (sha256: string) => {
+    try {
+      const file = await Filesystem.readFile({
+        path: `covers/${sha256}`,
+        directory: Directory.Data,
+      });
+      return file.data as string;
+    } catch {
+      throw new Error("读取图片失败");
     }
   },
 };

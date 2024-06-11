@@ -1,5 +1,6 @@
 import {
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
@@ -9,62 +10,219 @@ import {
   IonLabel,
   IonList,
   IonPage,
+  IonSkeletonText,
+  IonSpinner,
   IonText,
   IonTextarea,
+  IonThumbnail,
   IonTitle,
   IonToolbar,
+  useIonRouter,
 } from "@ionic/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
-import { API_DISH } from "../../apis/dish";
+import { API_DISH, UpdateDish } from "../../apis/dish";
 import LoadingSkeleton from "../../components/LoadingSkeleton";
+import { useImmer } from "use-immer";
+import getCoverDataUrl from "../../utils/getCoverDataUrl";
+import { useEffect } from "react";
+import getCover from "../../utils/getCover";
 
-const UpdateDishForm = () => {
-  const { id } = useParams<{ id: string }>();
+type DishFormProps = {
+  initialData: UpdateDish;
+};
 
-  const { isPending, data, isError, error } = useQuery({
-    queryKey: ["dish", id],
-    queryFn: () => API_DISH.GET(id),
+const DishForm = ({ initialData }: DishFormProps) => {
+  const router = useIonRouter();
+
+  const queryClient = useQueryClient();
+
+  const [dish, setDish] = useImmer<UpdateDish>(initialData);
+
+  const {
+    isPending: saveIsPending,
+    mutate: save,
+    isError: saveIsError,
+    error: saveError,
+  } = useMutation({
+    mutationFn: () => API_DISH.UPDATE(dish),
+    onSuccess: () => {
+      router.push(`/dishMng`, "back");
+      queryClient.invalidateQueries({
+        queryKey: ["dishList"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["dish", dish.id],
+      });
+    },
   });
 
-  if (isPending) {
-    return <LoadingSkeleton />;
-  }
-
-  if (isError) {
-    return <IonText color="danger">{error.message}</IonText>;
-  }
+  const {
+    isPending: uploadCoverIsPending,
+    mutate: uploadCover,
+    isError: uploadCoverIsError,
+    error: uploadCoverError,
+  } = useMutation({
+    mutationFn: () => getCover(),
+    onSuccess: (dataUrl) => {
+      setDish((d) => {
+        d.cover = dataUrl;
+      });
+    },
+  });
 
   return (
     <>
-      <IonImg src={data?.cover} className="h-64 object-cover" />
+      <img
+        src={dish.cover ? dish.cover : "/temp/covers/defaultCover.png"}
+        className="w-full h-64 aspect-square object-cover"
+      />
+
+      {uploadCoverIsError && (
+        <IonText color="danger">{uploadCoverError.message}</IonText>
+      )}
+
+      <IonButton
+        fill="clear"
+        expand="full"
+        onClick={() => uploadCover()}
+        disabled={uploadCoverIsPending}
+      >
+        上传菜品封面
+      </IonButton>
 
       <IonList>
         <IonItem>
-          <IonInput label="菜品名称" value={data?.name} />
+          <IonInput
+            label="菜品名称"
+            value={dish.name}
+            onIonInput={(e) => {
+              setDish((d) => {
+                d.name = e.target.value as string;
+              });
+            }}
+          />
         </IonItem>
 
         <IonItem>
-          <IonTextarea label="菜品描述" value={data?.description} rows={6} />
+          <IonTextarea
+            label="菜品描述"
+            value={dish.description}
+            rows={6}
+            onIonInput={(e) => {
+              setDish((d) => {
+                d.description = e.target.value as string;
+              });
+            }}
+          />
         </IonItem>
 
         <IonItem>
-          <IonInput label="菜品价格" value={data?.price} />
+          <IonInput
+            type="number"
+            label="菜品价格"
+            value={dish.price}
+            onIonInput={(e) => {
+              setDish((d) => {
+                d.price = e.target.value as string;
+              });
+            }}
+          />
         </IonItem>
 
         <IonItem>
-          <IonInput label="菜品种类" value={data?.type} />
+          <IonInput
+            label="菜品种类"
+            value={dish.type}
+            onIonInput={(e) => {
+              setDish((d) => {
+                d.type = e.target.value as string;
+              });
+            }}
+          />
         </IonItem>
       </IonList>
 
-      <IonItem>
-        <IonLabel>菜品图片:</IonLabel>
-      </IonItem>
+      {saveIsError && <IonText color="danger">{saveError.message}</IonText>}
+
+      <IonButton
+        fill="clear"
+        expand="full"
+        onClick={() => save()}
+        disabled={saveIsPending}
+      >
+        保存信息
+      </IonButton>
     </>
   );
 };
 
-const UpdateDish = () => {
+type UpdateDishForm2Props = {
+  dish: UpdateDish;
+};
+
+const UpdateDishForm2 = ({ dish }: UpdateDishForm2Props) => {
+  const {
+    isPending: coverIsPending,
+    data: cover,
+    isError: coverIsError,
+    error: coverError,
+  } = useQuery({
+    queryKey: ["cover", dish.cover],
+    queryFn: () => API_DISH.GET_COVER(dish.cover),
+  });
+
+  if (coverIsPending) {
+    return <LoadingSkeleton />;
+  }
+
+  if (coverIsError) {
+    return <IonText color="danger">{coverError.message}</IonText>;
+  }
+
+  return (
+    <DishForm
+      initialData={{
+        id: dish.id,
+        name: dish.name,
+        cover: `data:image/jpeg;base64,${cover}`,
+        description: dish.description,
+        price: dish.price,
+        type: dish.type,
+      }}
+    />
+  );
+};
+
+const UpdateDishForm = () => {
+  const { id } = useParams<{ id: string }>();
+
+  const {
+    isPending: dishIsPending,
+    data: dish,
+    isError: dishIsError,
+    error: dishError,
+  } = useQuery({
+    queryKey: ["dish", id],
+    queryFn: () => API_DISH.GET(id),
+  });
+
+  if (dishIsPending) {
+    return <LoadingSkeleton />;
+  }
+
+  if (dishIsError) {
+    return <IonText color="danger">{dishError.message}</IonText>;
+  }
+
+  return (
+    <>
+      <UpdateDishForm2 dish={dish} />
+    </>
+  );
+};
+
+const UpdateDishPage = () => {
   return (
     <IonPage>
       <IonHeader>
@@ -82,4 +240,4 @@ const UpdateDish = () => {
   );
 };
 
-export default UpdateDish;
+export default UpdateDishPage;
