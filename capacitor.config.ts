@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "org.bigben.order",
-  appName: "order",
+  appName: "点餐应用",
   webDir: "dist",
   plugins: {
     LiveUpdates: {

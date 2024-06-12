@@ -18,7 +18,6 @@ import {
 } from "@ionic/react";
 import { useImmer } from "use-immer";
 import { API_DISH, AddDish } from "../../apis/dish";
-import { Camera, CameraResultType } from "@capacitor/camera";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import getCover from "../../utils/getCover";
 

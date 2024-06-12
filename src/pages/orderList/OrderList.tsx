@@ -39,8 +39,9 @@ const OrderItem = ({ order }: OrderItemProps) => {
       {delIsError && <IonText color="danger">{delError.message}</IonText>}
 
       <IonItemSliding>
-        <IonItem button routerLink={`/orderDetail/${order.id}`}>
+        <IonItem button detail routerLink={`/orderDetail/${order.id}`}>
           <IonLabel>{new Date(order.createdAt).toLocaleString()}</IonLabel>
+          <IonLabel slot="end">￥{order.price}</IonLabel>
         </IonItem>
         <IonItemOptions side="end">
           <IonItemOption color="danger">

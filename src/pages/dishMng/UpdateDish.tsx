@@ -4,17 +4,12 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
-  IonImg,
   IonInput,
   IonItem,
-  IonLabel,
   IonList,
   IonPage,
-  IonSkeletonText,
-  IonSpinner,
   IonText,
   IonTextarea,
-  IonThumbnail,
   IonTitle,
   IonToolbar,
   useIonRouter,
@@ -24,8 +19,6 @@ import { useParams } from "react-router";
 import { API_DISH, UpdateDish } from "../../apis/dish";
 import LoadingSkeleton from "../../components/LoadingSkeleton";
 import { useImmer } from "use-immer";
-import getCoverDataUrl from "../../utils/getCoverDataUrl";
-import { useEffect } from "react";
 import getCover from "../../utils/getCover";
 
 type DishFormProps = {

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">order</string>
-    <string name="title_activity_main">order</string>
-    <string name="package_name">io.ionic.starter</string>
-    <string name="custom_url_scheme">io.ionic.starter</string>
+    <string name="app_name">点餐应用</string>
+    <string name="title_activity_main">点餐应用</string>
+    <string name="package_name">org.bigben.order</string>
+    <string name="custom_url_scheme">org.bigben.order</string>
 </resources>

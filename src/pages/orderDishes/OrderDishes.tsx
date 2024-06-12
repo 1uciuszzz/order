@@ -7,7 +7,6 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
-  IonItemDivider,
   IonLabel,
   IonList,
   IonMenu,
@@ -17,21 +16,16 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  useIonRouter,
 } from "@ionic/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { API_DISH } from "../../apis/dish";
-import { useParams } from "react-router";
 import TypesBar from "./TypesBar";
 import LoadingSkeleton from "../../components/LoadingSkeleton";
 import DishList from "./DishList";
-import {
-  cartOutline,
-  close,
-  closeCircle,
-  closeCircleOutline,
-} from "ionicons/icons";
+import { cartOutline, close } from "ionicons/icons";
 import { useImmer } from "use-immer";
-import { OrderDish } from "../../apis/order";
+import { API_ORDER, OrderDish } from "../../apis/order";
 
 type OrderDishesProps = {
   orderDishes: OrderDish[];
@@ -45,7 +39,7 @@ const OrderDishes = ({
   removeDish,
 }: OrderDishesProps) => {
   const { isPending, data, isError, error } = useQuery({
-    queryKey: ["dishes"],
+    queryKey: ["dishList"],
     queryFn: () => API_DISH.LIST(),
   });
 
@@ -72,6 +66,8 @@ const OrderDishes = ({
 };
 
 const OrderDishPage = () => {
+  const router = useIonRouter();
+
   const [orderDish, setOrderDish] = useImmer<OrderDish[]>([]);
 
   const addDish = (dish: OrderDish) => {
@@ -102,6 +98,24 @@ const OrderDishPage = () => {
   const clearDish = () => {
     setOrderDish(() => []);
   };
+
+  const queryClient = useQueryClient();
+
+  const {
+    isPending: orderIsPending,
+    mutate: order,
+    isError: orderIsError,
+    error: orderError,
+  } = useMutation({
+    mutationFn: () => API_ORDER.ADD({ dishes: orderDish }),
+    onSuccess: (res) => {
+      setOrderDish(() => []);
+      queryClient.invalidateQueries({
+        queryKey: ["orderList"],
+      });
+      router.push(`/orderDetail/${res.id}`, "forward", "push");
+    },
+  });
 
   return (
     <>
@@ -137,31 +151,35 @@ const OrderDishPage = () => {
                 0
               )}
             </IonLabel>
-            <IonButton slot="end" className="h-full" fill="solid" expand="full">
+
+            {orderIsError && (
+              <IonText color="danger">{orderError.message}</IonText>
+            )}
+
+            <IonButton
+              slot="end"
+              className="h-full"
+              fill="solid"
+              expand="full"
+              id="submitOrder"
+              disabled={orderIsPending}
+            >
               提交订单
             </IonButton>
             <IonAlert
-              header="Alert!"
-              trigger="present-alert"
+              header="确定下单？"
+              trigger="submitOrder"
               buttons={[
                 {
-                  text: "Cancel",
+                  text: "取消",
                   role: "cancel",
-                  handler: () => {
-                    console.log("Alert canceled");
-                  },
                 },
                 {
-                  text: "OK",
+                  text: "确定",
                   role: "confirm",
-                  handler: () => {
-                    console.log("Alert confirmed");
-                  },
+                  handler: () => order(),
                 },
               ]}
-              onDidDismiss={({ detail }) =>
-                console.log(`Dismissed with role: ${detail.role}`)
-              }
             ></IonAlert>
           </IonItem>
         </IonContent>
