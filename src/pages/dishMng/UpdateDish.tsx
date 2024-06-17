@@ -112,19 +112,6 @@ const DishForm = ({ initialData }: DishFormProps) => {
 
         <IonItem>
           <IonInput
-            type="number"
-            label="菜品价格"
-            value={dish.price}
-            onIonInput={(e) => {
-              setDish((d) => {
-                d.price = e.target.value as string;
-              });
-            }}
-          />
-        </IonItem>
-
-        <IonItem>
-          <IonInput
             label="菜品种类"
             value={dish.type}
             onIonInput={(e) => {
@@ -180,7 +167,6 @@ const UpdateDishForm2 = ({ dish }: UpdateDishForm2Props) => {
         name: dish.name,
         cover: `data:image/jpeg;base64,${cover}`,
         description: dish.description,
-        price: dish.price,
         type: dish.type,
       }}
     />

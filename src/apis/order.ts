@@ -4,14 +4,12 @@ import { v4 as uuid } from "uuid";
 export type OrderDish = {
   dishId: string;
   dishName: string;
-  dishPrice: number;
   quantity: number;
 };
 
 export type Order = {
   id: string;
   dishes: OrderDish[];
-  price: number;
   createdAt: string;
 };
 
@@ -53,14 +51,9 @@ export const API_ORDER = {
   ADD: async (payload: AddOrder) => {
     try {
       const id = uuid();
-      const price = payload.dishes.reduce(
-        (acc, dish) => acc + dish.dishPrice * dish.quantity,
-        0
-      );
       const newOrder: Order = {
         id,
         dishes: payload.dishes,
-        price,
         createdAt: new Date().toISOString(),
       };
       await Filesystem.writeFile({

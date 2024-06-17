@@ -3,7 +3,6 @@ export type Dish = {
   name: string;
   description: string;
   cover: string;
-  price: string;
   type: string;
   createdAt: string;
 };
@@ -18,7 +17,6 @@ export type AddDish = {
   name: string;
   description: string;
   cover: string;
-  price: string;
   type: string;
 };
 
@@ -66,7 +64,6 @@ export const API_DISH = {
         id: id,
         name: payload.name,
         description: payload.description,
-        price: payload.price,
         cover: sha256,
         type: payload.type,
         createdAt: new Date().toISOString(),
@@ -96,7 +93,6 @@ export const API_DISH = {
         id: payload.id,
         name: payload.name,
         description: payload.description,
-        price: payload.price,
         cover: sha256,
         type: payload.type,
         createdAt: new Date().toISOString(),

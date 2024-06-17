@@ -1,14 +1,10 @@
 import {
-  IonButton,
-  IonButtons,
   IonContent,
   IonHeader,
-  IonIcon,
   IonPage,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import { addOutline } from "ionicons/icons";
 import OrderList from "./OrderList";
 
 const OrderMng = () => {

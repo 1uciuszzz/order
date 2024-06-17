@@ -1,6 +1,7 @@
 import {
   IonAlert,
   IonBackButton,
+  IonBadge,
   IonButton,
   IonButtons,
   IonContent,
@@ -52,8 +53,7 @@ const OrderDishes = ({
   }
 
   return (
-    <IonRow>
-      <TypesBar types={data.type} />
+    <div className="mb-24">
       <DishList
         types={data.type}
         dishes={data.list}
@@ -61,7 +61,7 @@ const OrderDishes = ({
         addDish={addDish}
         removeDish={removeDish}
       />
-    </IonRow>
+    </div>
   );
 };
 
@@ -137,20 +137,12 @@ const OrderDishPage = () => {
             removeDish={removeDish}
             orderDishes={orderDish}
           />
-
-          <IonItem className="w-full fixed bottom-0 z-10">
+          <IonItem className="w-full fixed bottom-0 z-10 ">
             <IonMenuToggle>
               <IonButton className="h-full w-16" fill="solid" expand="full">
                 <IonIcon slot="icon-only" icon={cartOutline} />
               </IonButton>
             </IonMenuToggle>
-            <IonLabel className="mx-4">
-              合计：￥
-              {orderDish.reduce(
-                (acc, dish) => acc + dish.dishPrice * dish.quantity,
-                0
-              )}
-            </IonLabel>
 
             {orderIsError && (
               <IonText color="danger">{orderError.message}</IonText>
@@ -201,12 +193,8 @@ const OrderDishPage = () => {
             {orderDish.map((dish) => {
               return (
                 <IonItem key={dish.dishId}>
-                  <IonLabel>
-                    {dish.quantity} × {dish.dishName}
-                  </IonLabel>
-                  <IonLabel slot="end">
-                    ￥{dish.dishPrice * dish.quantity}
-                  </IonLabel>
+                  <IonLabel>{dish.dishName}</IonLabel>
+                  <IonBadge slot="end">{dish.quantity}</IonBadge>
                 </IonItem>
               );
             })}

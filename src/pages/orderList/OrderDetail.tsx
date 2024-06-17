@@ -1,5 +1,6 @@
 import {
   IonBackButton,
+  IonBadge,
   IonButtons,
   IonContent,
   IonHeader,
@@ -53,18 +54,12 @@ const OrderContent = () => {
         {data.dishes.map((dish) => {
           return (
             <IonItem key={dish.dishId}>
-              <IonLabel>
-                {dish.quantity} × {dish.dishName}
-              </IonLabel>
-              <IonLabel slot="end">￥{dish.dishPrice * dish.quantity}</IonLabel>
+              <IonLabel>{dish.dishName}</IonLabel>
+              <IonBadge slot="end">{dish.quantity}</IonBadge>
             </IonItem>
           );
         })}
       </IonItemGroup>
-      <IonItem>
-        <IonLabel color="warning">总价</IonLabel>
-        <IonLabel slot="end">￥{data.price}</IonLabel>
-      </IonItem>
     </IonList>
   );
 };

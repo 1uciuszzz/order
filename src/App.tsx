@@ -49,6 +49,7 @@ import OrderDetail from "./pages/orderList/OrderDetail";
 import OrderMng from "./pages/orderList/OrderMng";
 import OrderDishPage from "./pages/orderDishes/OrderDishes";
 import UpdateDishPage from "./pages/dishMng/UpdateDish";
+import DishDetailPage from "./pages/orderDishes/DishDetail";
 
 setupIonicReact();
 
@@ -64,6 +65,9 @@ const Routes = () => {
         </Route>
         <Route exact path="/orderDish">
           <OrderDishPage />
+        </Route>
+        <Route exact path="/dishDetail/:id">
+          <DishDetailPage />
         </Route>
         <Route exact path="/settings">
           <Settings />

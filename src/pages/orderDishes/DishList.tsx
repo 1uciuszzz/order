@@ -10,6 +10,8 @@ import {
   IonList,
   IonRow,
   IonText,
+  IonThumbnail,
+  useIonRouter,
 } from "@ionic/react";
 import { API_DISH, Dish } from "../../apis/dish";
 import { addCircleOutline, removeCircleOutline } from "ionicons/icons";
@@ -40,6 +42,8 @@ const DishItem = ({
     queryFn: () => API_DISH.GET_COVER(dish.cover),
   });
 
+  const router = useIonRouter();
+
   if (coverIsPending) {
     return <LoadingSkeleton />;
   }
@@ -50,22 +54,33 @@ const DishItem = ({
 
   return (
     <IonItem>
-      <img
-        slot="start"
-        className="w-20 h-20 object-cover"
-        src={`data:image/png;base64,${cover}`}
-      />
-      <IonCol>
-        <IonLabel>{dish.name}</IonLabel>
-        <IonLabel>￥{dish.price}</IonLabel>
-      </IonCol>
+      <IonThumbnail slot="start">
+        <img
+          className="w-full h-full object-cover"
+          alt={dish.name}
+          src={
+            dish.cover
+              ? `data:image/png;base64,${cover}`
+              : `/temp/covers/defaultCover.png`
+          }
+        />
+      </IonThumbnail>
+      <IonText
+        onClick={() => router.push(`/dishDetail/${dish.id}`, "forward", "push")}
+      >
+        <p>{dish.name}</p>
+      </IonText>
       <IonRow slot="end">
         <IonButtons>
           {orderDishes.findIndex(
             (orderDish) => orderDish.dishId === dish.id
           ) !== -1 && (
             <>
-              <IonButton onClick={() => removeDish(dish.id)}>
+              <IonButton
+                onClick={() => {
+                  removeDish(dish.id);
+                }}
+              >
                 <IonIcon slot="icon-only" icon={removeCircleOutline} />
               </IonButton>
               <IonLabel>
@@ -77,14 +92,13 @@ const DishItem = ({
             </>
           )}
           <IonButton
-            onClick={() =>
+            onClick={() => {
               addDish({
                 dishId: dish.id,
                 dishName: dish.name,
-                dishPrice: +dish.price,
                 quantity: 1,
-              })
-            }
+              });
+            }}
           >
             <IonIcon slot="icon-only" icon={addCircleOutline} />
           </IonButton>
@@ -115,7 +129,7 @@ const DishList = ({
         return (
           <IonItemGroup key={type}>
             <IonItemDivider>
-              <IonLabel>{type}</IonLabel>
+              <IonLabel id={type}>{type}</IonLabel>
             </IonItemDivider>
             {dishes
               .filter((dish) => dish.type === type)

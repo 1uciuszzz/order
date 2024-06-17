@@ -72,7 +72,6 @@ const DishItem = ({ dish }: DishItemProps) => {
             />
           </IonThumbnail>
           <IonLabel>{dish.name}</IonLabel>
-          <IonLabel slot="end">￥{dish.price}</IonLabel>
         </IonItem>
         <IonItemOptions side="end">
           <IonItemOption color="danger">

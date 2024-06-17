@@ -1,4 +1,10 @@
-import { IonItem, IonLabel, IonList } from "@ionic/react";
+import {
+  IonItem,
+  IonLabel,
+  IonList,
+  IonRouterLink,
+  IonText,
+} from "@ionic/react";
 
 type TypesBarProps = {
   types: string[];
@@ -6,11 +12,11 @@ type TypesBarProps = {
 
 const TypesBar = ({ types }: TypesBarProps) => {
   return (
-    <IonList>
+    <IonList className="w-24 overflow-y-auto">
       {types.map((type) => {
         return (
-          <IonItem key={type}>
-            <IonLabel className="text-nowrap">{type}</IonLabel>
+          <IonItem key={type} routerLink={`#${type}`}>
+            <IonText>{type}</IonText>
           </IonItem>
         );
       })}

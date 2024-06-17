@@ -25,7 +25,6 @@ const initialData: AddDish = {
   cover: "",
   name: "",
   description: "",
-  price: "",
   type: "",
 };
 
@@ -117,21 +116,6 @@ const CreateDish = () => {
               onIonInput={(e) => {
                 setDish((d) => {
                   d.description = e.target.value as string;
-                });
-              }}
-            />
-          </IonItem>
-
-          <IonItem>
-            <IonInput
-              type="number"
-              label="菜品价格"
-              value={dish.price}
-              onIonInput={(e) => {
-                const value = e.target.value as string;
-                const filteredValue = value.replace(/[^0-9]+/g, "");
-                setDish((d) => {
-                  d.price = filteredValue;
                 });
               }}
             />
